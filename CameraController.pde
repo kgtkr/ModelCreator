@@ -58,6 +58,11 @@ class CameraController {
     PVector result = new PVector();
     return matrix.mult(this.EYE, result);
   }
+
+  float absoluteScale() {
+    PVector point = getPoint();
+    return point.mag() / this.EYE.mag();
+  }
 }
 
 // 画面上の2d座標を3d座標に変換する

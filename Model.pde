@@ -30,7 +30,6 @@ class Model {
   }
 
   void draw() {
-    fill(255, 255, 255);
     for (ArrayList<Integer> face : this.faces.values()) {
       beginShape();
       for (int vId : face) {
@@ -61,14 +60,13 @@ class Model {
     }
   }
 
-  int findVertexId(PVector v1, PVector v2) {
+  int findVertexId(PVector v1, PVector v2, float r) {
     int result = -1;
     float dMin = Float.MAX_VALUE;
     for (int vId : this.vertices.keySet()) {
       PVector v = this.vertices.get(vId);
       float d = distPointToLine(v, v1, v2);
-      println(d);
-      if (d < 3) {
+      if (d < r) {
         float d2 = v.dist(v1);
         if (d2 < dMin) {
           dMin = d2;
