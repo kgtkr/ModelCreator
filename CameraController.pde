@@ -5,13 +5,19 @@ class CameraController {
   CameraController() {
     this.matrix = new PMatrix3D();
   }
-  PVector fromScreen(float x, float y, float z) {
+  PVector fromScreen(PVector v) {
     PMatrix3D matrix = new PMatrix3D();
     matrix.set(this.matrix);
     matrix.invert();
-    PVector result = new PVector(x, y, z);
+    PVector result = v.copy();
     result.sub(width / 2, height / 2);
     matrix.mult(result, result);
+    return result;
+  }
+  PVector toScreen(PVector vector) {
+    PVector result = new PVector(vector.x, vector.y, vector.z);
+    this.matrix.mult(result, result);
+    result.add(width / 2, height / 2);
     return result;
   }
   void draw() {
