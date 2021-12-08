@@ -60,6 +60,24 @@ class Model {
       v.z = (v.z - min.z) / scale;
     }
   }
+
+  int findVertexId(PVector v1, PVector v2) {
+    int result = -1;
+    float dMin = Float.MAX_VALUE;
+    for (int vId : this.vertices.keySet()) {
+      PVector v = this.vertices.get(vId);
+      float d = distPointToLine(v, v1, v2);
+      println(d);
+      if (d < 3) {
+        float d2 = v.dist(v1);
+        if (d2 < dMin) {
+          dMin = d2;
+          result = vId;
+        }
+      }
+    }
+    return result;
+  }
 }
 
 Model encodeModel(String[] lines) {
@@ -80,4 +98,10 @@ Model encodeModel(String[] lines) {
     }
   }
   return m;
+}
+
+float distPointToLine(PVector v, PVector v1, PVector v2) {
+  float t = PVector.dot(v1.copy().sub(v), v2) * -1 / v2.magSq();
+  float d = v.dist(v1.copy().add(v2.copy().mult(t)));
+  return d;
 }

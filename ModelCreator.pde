@@ -17,14 +17,24 @@ void draw() {
   cameraController.draw();
   PVector cameraPoint = cameraController.getPoint();
 
-  PVector v = cameraController.fromScreen(mouseX, mouseY);
-  println(v);
+  PVector v = cameraController.fromScreen(mouseX, mouseY, 0);
   pushMatrix();
   translate(v.x, v.y, v.z);
   sphere(5);
   popMatrix();
 
-
+  PVector v2 = cameraController.fromScreen(mouseX, mouseY, 1000);
+  PVector v3 = PVector.sub(v2, v);
+  int vId = model.findVertexId(v, v3);
+  if (vId != -1) {
+    PVector v4 = model.vertices.get(vId);
+    pushMatrix();
+    translate(v4.x, v4.y, v4.z);
+    fill(255, 0, 0);
+    sphere(5);
+    fill(255, 255, 255);
+    popMatrix();
+  }
 
   strokeWeight(2);
   stroke(255, 0, 0);

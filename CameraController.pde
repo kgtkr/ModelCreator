@@ -5,16 +5,17 @@ class CameraController {
   CameraController() {
     this.matrix = new PMatrix3D();
   }
-  PVector fromScreen(float x, float y) {
+  PVector fromScreen(float x, float y, float z) {
     PMatrix3D matrix = new PMatrix3D();
     matrix.set(this.matrix);
     matrix.invert();
-    PVector result = new PVector(x, y, 1);
+    PVector result = new PVector(x, y, z);
     result.sub(width / 2, height / 2);
     matrix.mult(result, result);
     return result;
   }
   void draw() {
+    ortho();
     camera(this.EYE.x, this.EYE.y, this.EYE.z, 0, 0, 0, 0, 1, 0);
     applyMatrix(this.matrix);
   }
