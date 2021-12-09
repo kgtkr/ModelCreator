@@ -30,6 +30,17 @@ class Model {
   }
 
   void draw() {
+    for (PVector v : this.vertices.values()) {
+      push();
+      pushMatrix();
+      translate(v.x, v.y, v.z);
+      fill(100, 100, 100);
+      noStroke();
+      sphere(cameraController.absoluteScale());
+      popMatrix();
+      pop();
+    }
+
     for (ArrayList<Integer> face : this.faces.values()) {
       beginShape();
       for (int vId : face) {

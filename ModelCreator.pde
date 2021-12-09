@@ -21,11 +21,11 @@ void draw() {
   cameraController.draw();
 
   hoverdVId = findHoverVId();
-  drawHoverdVertex();
-  drawSelectedVertex();
 
   drawAxis();
   drawModel();
+  drawHoverdVertex();
+  drawSelectedVertex();
 }
 
 int findHoverVId() {
