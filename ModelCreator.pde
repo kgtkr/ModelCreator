@@ -1,3 +1,5 @@
+import java.util.HashSet;
+
 CameraController cameraController = new CameraController();
 boolean pressCtrl;
 boolean pressCmd;
@@ -5,7 +7,7 @@ boolean pressAlt;
 boolean pressShift;
 Model model;
 int hoverdVId = -1;
-int selectedVId = -1;
+HashSet<Integer> selectedVIds = new HashSet();
 
 void setup() {
   size(1280, 720, P3D);
@@ -46,14 +48,21 @@ void drawModel() {
 void mousePressed() {
   if (pressShift) {
     cameraController.mousePressed();
-  }
-  if (hoverdVId != -1) {
-    selectedVId = hoverdVId;
+  } else {
+    if (hoverdVId != -1) {
+      if (selectedVIds.contains(hoverdVId)) {
+        selectedVIds.remove(hoverdVId);
+      } else {
+        selectedVIds.add(hoverdVId);
+      }
+    }
   }
 }
 
 void mouseReleased() {
-  selectedVId = -1;
+  if (!pressCtrl) {
+    selectedVIds.clear();
+  }
 }
 
 void mouseDragged() {
@@ -61,7 +70,7 @@ void mouseDragged() {
     cameraController.mouseDragged();
   }
 
-  if (selectedVId != -1) {
+  for (int selectedVId : selectedVIds) {
     PVector v1 = model.vertices.get(selectedVId);
     PVector v2 = cameraController.toScreen(v1);
     v2.add(new PVector(mouseX - pmouseX, mouseY - pmouseY, 0));
@@ -92,6 +101,13 @@ void keyPressed() {
 
   if (keyCode == SHIFT) {
     pressShift = true;
+  }
+
+  if (keyCode == BACKSPACE) {
+    for (int selectedVId : selectedVIds) {
+      model.removeVertex(selectedVId);
+    }
+    selectedVIds.clear();
   }
 }
 
@@ -127,7 +143,7 @@ void drawAxis() {
 }
 
 void drawHoverdVertex() {
-  if (selectedVId == -1 && hoverdVId != -1) {
+  if (hoverdVId != -1 && !selectedVIds.contains(hoverdVId)) {
     PVector v = model.vertices.get(hoverdVId);
     push();
     pushMatrix();
@@ -141,7 +157,7 @@ void drawHoverdVertex() {
 }
 
 void drawSelectedVertex() {
-  if (selectedVId != -1) {
+  for (int selectedVId : selectedVIds) {
     PVector v = model.vertices.get(selectedVId);
     push();
     pushMatrix();

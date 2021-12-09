@@ -76,6 +76,19 @@ class Model {
     }
     return result;
   }
+
+  void addVertex(PVector v) {
+    this.vertices.put(this.vIdCounter, v);
+    this.vIdCounter++;
+  }
+
+  void removeVertex(int vId) {
+    this.vertices.remove(vId);
+    for (int fId : this.faces.keySet()) {
+      ArrayList<Integer> f = this.faces.get(fId);
+      f.remove(Integer.valueOf(vId));
+    }
+  }
 }
 
 Model encodeModel(String[] lines) {
