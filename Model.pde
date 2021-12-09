@@ -5,6 +5,8 @@ class Model {
   HashMap<Integer, PVector> vertices = new HashMap<>();
   int fIdCounter = 1;
   HashMap<Integer, ArrayList<Integer>> faces = new HashMap<>();
+  HashSet<Integer> selectedVIds = new HashSet();
+  int hoverdVId = -1;
 
   String[] decode() {
     ArrayList<String> lines = new ArrayList();
@@ -95,23 +97,81 @@ class Model {
     return vId;
   }
 
-  int addFace(ArrayList<Integer> f) {
+  int addFace() {
+    if (this.selectedVIds.size() < 3) {
+      return -1;
+    }
+
+    ArrayList<Integer> vIds = new ArrayList<Integer>(this.selectedVIds);
+
     int fId = this.fIdCounter;
-    this.faces.put(this.fIdCounter, f);
+    this.faces.put(this.fIdCounter, vIds);
     this.fIdCounter++;
     return fId;
   }
 
-  void removeVertex(int vId) {
-    this.vertices.remove(vId);
-    for (int fId : this.faces.keySet()) {
-      ArrayList<Integer> f = this.faces.get(fId);
-      f.remove(Integer.valueOf(vId));
+  void removeVertices() {
+    for (int vId : this.selectedVIds) {
+      this.vertices.remove(vId);
+      for (int fId : this.faces.keySet()) {
+        ArrayList<Integer> f = this.faces.get(fId);
+        f.remove(Integer.valueOf(vId));
+      }
+    }
+
+    this.selectedVIds.clear();
+  }
+
+  void moveVertices(PVector v) {
+    for (int vId : this.selectedVIds) {
+      PVector v1 = this.vertices.get(vId);
+      PVector v2 = v1.copy().add(v);
+      this.vertices.put(vId, v2);
     }
   }
 
-  void moveVertex(int vId, PVector v) {
-    this.vertices.put(vId, v);
+  void toggleSelectedVertex(boolean multipleSelect, int vId) {
+    if (!multipleSelect) {
+      this.selectedVIds.clear();
+    }
+
+    if (this.selectedVIds.contains(vId)) {
+      this.selectedVIds.remove(vId);
+    } else {
+      this.selectedVIds.add(vId);
+    }
+  }
+
+  void clearSelectedVertices() {
+    this.selectedVIds.clear();
+  }
+
+  void drawSelectedVertices() {
+    for (int selectedVId : this.selectedVIds) {
+      PVector v = model.vertices.get(selectedVId);
+      push();
+      pushMatrix();
+      translate(v.x, v.y, v.z);
+      fill(255, 0, 0);
+      noStroke();
+      sphere(5 * cameraController.absoluteScale());
+      popMatrix();
+      pop();
+    }
+  }
+
+  void drawHoverdVertex(int hoverdVId) {
+    if (!selectedVIds.contains(hoverdVId)) {
+      PVector v = model.vertices.get(hoverdVId);
+      push();
+      pushMatrix();
+      translate(v.x, v.y, v.z);
+      fill(150, 150, 150);
+      noStroke();
+      sphere(5 * cameraController.absoluteScale());
+      popMatrix();
+      pop();
+    }
   }
 }
 
