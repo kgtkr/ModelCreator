@@ -109,6 +109,10 @@ class Model {
       f.remove(Integer.valueOf(vId));
     }
   }
+
+  void moveVertex(int vId, PVector v) {
+    this.vertices.put(vId, v);
+  }
 }
 
 Model encodeModel(String[] lines) {

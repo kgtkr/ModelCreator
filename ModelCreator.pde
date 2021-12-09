@@ -94,8 +94,7 @@ void mouseDragged() {
       PVector v2 = cameraController.toScreen(v1);
       v2.add(new PVector(mouseX - pmouseX, mouseY - pmouseY, 0));
       PVector v3 = cameraController.fromScreen(v2);
-      PVector v = model.vertices.get(selectedVId);
-      v.set(v3);
+      model.moveVertex(selectedVId, v3);
     }
   }
 }
