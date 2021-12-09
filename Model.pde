@@ -73,16 +73,19 @@ class Model {
     }
   }
 
-  int findVertexId(PVector v1, PVector v2, float r) {
+  int findVertexId(PMatrix3D matrix, PVector p, float r) {
     int result = -1;
-    float dMin = Float.MAX_VALUE;
+    float zMax = Float.MIN_VALUE;
     for (int vId : this.vertices.keySet()) {
       PVector v = this.vertices.get(vId);
-      float d = distPointToLine(v, v1, v2);
+      PVector v2 = v.copy();
+      matrix.mult(v2, v2);
+      float z = v2.z;
+      v2.z = 0;
+      float d = PVector.dist(p, v2);
       if (d < r) {
-        float d2 = v.dist(v1);
-        if (d2 < dMin) {
-          dMin = d2;
+        if (z > zMax) {
+          zMax = z;
           result = vId;
         }
       }
@@ -197,10 +200,4 @@ Model encodeModel(String[] lines) {
     }
   }
   return m;
-}
-
-float distPointToLine(PVector v, PVector v1, PVector v2) {
-  float t = PVector.dot(v1.copy().sub(v), v2) * -1 / v2.magSq();
-  float d = v.dist(v1.copy().add(v2.copy().mult(t)));
-  return d;
 }

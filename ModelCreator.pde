@@ -53,10 +53,10 @@ void calclateHoverdVId() {
 }
 
 int findHoverVId() {
-  PVector v1 = cameraController.fromScreen(new PVector(mouseX, mouseY, 0));
-  PVector v2 = cameraController.fromScreen(new PVector(mouseX, mouseY, 1000));
-  PVector v3 = PVector.sub(v2, v1);
-  return model.findVertexId(v1, v3, 3 * cameraController.absoluteScale());
+  PMatrix3D matrix = new PMatrix3D();
+  matrix.translate(width / 2, height / 2);
+  matrix.apply(cameraController.matrix);
+  return model.findVertexId(matrix, new PVector(mouseX, mouseY), 1 / cameraController.absoluteScale());
 }
 
 boolean pressControl() {
