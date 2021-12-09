@@ -8,6 +8,7 @@ boolean pressShift;
 boolean pressSpace;
 Model model;
 int hoverdVId = -1;
+boolean redraw = true;
 
 void setup() {
   size(1280, 720, P3D);
@@ -16,23 +17,33 @@ void setup() {
 }
 
 void draw() {
-  background(0);
+  calclateHoverdVId();
+  if (redraw) {
+    background(0);
+    cameraController.draw();
+    drawAxis();
+    drawModel();
+    if (hoverdVId != -1) {
+      model.drawHoverdVertex(hoverdVId);
+    }
+    model.drawSelectedVertices(hoverdVId);
 
-  cameraController.draw();
+    redraw = false;
+    println("redraw", frameCount);
+  }
+}
 
+void calclateHoverdVId() {
+  int newHoverdVId;
   if (!pressSpace) {
-    hoverdVId = findHoverVId();
+    newHoverdVId = findHoverVId();
   } else {
-    hoverdVId = -1;
+    newHoverdVId = -1;
   }
-
-
-  drawAxis();
-  drawModel();
-  if (hoverdVId != -1) {
-    model.drawHoverdVertex(hoverdVId);
+  if (newHoverdVId != hoverdVId) {
+    hoverdVId = newHoverdVId;
+    redraw = true;
   }
-  model.drawSelectedVertices();
 }
 
 int findHoverVId() {
@@ -59,6 +70,7 @@ void drawModel() {
 void mousePressed() {
   if (pressShift) {
     cameraController.mousePressed();
+    redraw = true;
   } else {
     if (pressSpace) {
       PVector v = cameraController.fromScreen(new PVector(mouseX, mouseY, 0));
@@ -71,29 +83,27 @@ void mousePressed() {
         model.clearSelectedVertices();
       }
     }
-  }
-}
-
-void mouseReleased() {
-  if (pressShift) {
-    return;
+    redraw = true;
   }
 }
 
 void mouseDragged() {
   if (pressShift) {
     cameraController.mouseDragged();
+    redraw = true;
   } else {
     PVector v1 = cameraController.fromScreen(new PVector(mouseX, mouseY, 0));
     PVector v2 = cameraController.fromScreen(new PVector(pmouseX, pmouseY, 0));
     PVector v3 = PVector.sub(v1, v2);
     model.moveVertices(v3);
+    redraw = true;
   }
 }
 
 void mouseWheel(MouseEvent event) {
   if (pressShift) {
     cameraController.mouseWheel(event);
+    redraw = true;
   }
 }
 
@@ -124,10 +134,12 @@ void keyPressed() {
 
   if (keyCode == BACKSPACE) {
     model.removeVertices();
+    redraw = true;
   }
 
   if (keyCode == ENTER) {
     model.addFace();
+    redraw = true;
   }
 }
 

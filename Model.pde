@@ -146,13 +146,17 @@ class Model {
     this.selectedVIds.clear();
   }
 
-  void drawSelectedVertices() {
+  void drawSelectedVertices(int hoverdVId) {
     for (int selectedVId : this.selectedVIds) {
       PVector v = model.vertices.get(selectedVId);
       push();
       pushMatrix();
       translate(v.x, v.y, v.z);
-      fill(255, 0, 0);
+      if (selectedVId != hoverdVId) {
+        fill(255, 0, 0);
+      } else {
+        fill(255, 255, 0);
+      }
       noStroke();
       sphere(5 * cameraController.absoluteScale());
       popMatrix();
