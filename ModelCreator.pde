@@ -64,6 +64,9 @@ void mousePressed() {
 }
 
 void mouseReleased() {
+  if (pressShift) {
+    return;
+  }
   if (!pressCtrl) {
     selectedVIds.clear();
   }
@@ -72,15 +75,15 @@ void mouseReleased() {
 void mouseDragged() {
   if (pressShift) {
     cameraController.mouseDragged();
-  }
-
-  for (int selectedVId : selectedVIds) {
-    PVector v1 = model.vertices.get(selectedVId);
-    PVector v2 = cameraController.toScreen(v1);
-    v2.add(new PVector(mouseX - pmouseX, mouseY - pmouseY, 0));
-    PVector v3 = cameraController.fromScreen(v2);
-    PVector v = model.vertices.get(selectedVId);
-    v.set(v3);
+  } else {
+    for (int selectedVId : selectedVIds) {
+      PVector v1 = model.vertices.get(selectedVId);
+      PVector v2 = cameraController.toScreen(v1);
+      v2.add(new PVector(mouseX - pmouseX, mouseY - pmouseY, 0));
+      PVector v3 = cameraController.fromScreen(v2);
+      PVector v = model.vertices.get(selectedVId);
+      v.set(v3);
+    }
   }
 }
 
@@ -105,6 +108,10 @@ void keyPressed() {
 
   if (keyCode == SHIFT) {
     pressShift = true;
+  }
+
+  if (pressShift) {
+    return;
   }
 
   if (keyCode == BACKSPACE) {
