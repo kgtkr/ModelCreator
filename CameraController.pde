@@ -4,19 +4,20 @@ class CameraController {
   PMatrix3D matrix;
   CameraController() {
     this.matrix = new PMatrix3D();
-    this.matrix.translate(width / 2, height / 2);
   }
   PVector fromScreen(PVector v) {
     PMatrix3D matrix = new PMatrix3D();
     matrix.set(this.matrix);
     matrix.invert();
     PVector result = v.copy();
+    result.sub(width / 2, height / 2);
     matrix.mult(result, result);
     return result;
   }
   PVector toScreen(PVector vector) {
     PVector result = new PVector(vector.x, vector.y, vector.z);
     this.matrix.mult(result, result);
+    result.add(width / 2, height / 2);
     return result;
   }
   void draw() {
@@ -27,7 +28,6 @@ class CameraController {
   void mousePressed() {
     if (mouseButton == RIGHT) {
       this.matrix.reset();
-      this.matrix.translate(width / 2, height / 2);
     }
   }
   void mouseDragged() {
