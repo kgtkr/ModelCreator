@@ -17,6 +17,7 @@ void setup() {
 }
 
 void draw() {
+  translate(width / 2, height / 2);
   calclateHoverdVId();
   if (redraw) {
     long start = System.nanoTime();
@@ -53,10 +54,7 @@ void calclateHoverdVId() {
 }
 
 int findHoverVId() {
-  PMatrix3D matrix = new PMatrix3D();
-  matrix.translate(width / 2, height / 2);
-  matrix.apply(cameraController.matrix);
-  return model.findVertexId(matrix, new PVector(mouseX, mouseY), 1 / cameraController.absoluteScale());
+  return model.findVertexId(cameraController.matrix, new PVector(mouseX, mouseY), 1 / cameraController.absoluteScale());
 }
 
 boolean pressControl() {

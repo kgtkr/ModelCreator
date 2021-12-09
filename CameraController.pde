@@ -10,14 +10,12 @@ class CameraController {
     matrix.set(this.matrix);
     matrix.invert();
     PVector result = v.copy();
-    result.sub(width / 2, height / 2);
     matrix.mult(result, result);
     return result;
   }
   PVector toScreen(PVector vector) {
     PVector result = new PVector(vector.x, vector.y, vector.z);
     this.matrix.mult(result, result);
-    result.add(width / 2, height / 2);
     return result;
   }
   void draw() {
