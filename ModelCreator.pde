@@ -5,6 +5,7 @@ boolean pressCtrl;
 boolean pressCmd;
 boolean pressAlt;
 boolean pressShift;
+boolean pressSpace;
 Model model;
 int hoverdVId = -1;
 HashSet<Integer> selectedVIds = new HashSet();
@@ -20,7 +21,12 @@ void draw() {
 
   cameraController.draw();
 
-  hoverdVId = findHoverVId();
+  if (!pressSpace) {
+    hoverdVId = findHoverVId();
+  } else {
+    hoverdVId = -1;
+  }
+
 
   drawAxis();
   drawModel();
@@ -33,6 +39,10 @@ int findHoverVId() {
   PVector v2 = cameraController.fromScreen(new PVector(mouseX, mouseY, 1000));
   PVector v3 = PVector.sub(v2, v1);
   return model.findVertexId(v1, v3, 3 * cameraController.absoluteScale());
+}
+
+boolean pressControl() {
+  return pressCtrl || pressCmd;
 }
 
 void drawModel() {
@@ -49,13 +59,19 @@ void mousePressed() {
   if (pressShift) {
     cameraController.mousePressed();
   } else {
+    if (!pressControl()) {
+      selectedVIds.clear();
+    }
+
     if (hoverdVId != -1) {
       if (selectedVIds.contains(hoverdVId)) {
         selectedVIds.remove(hoverdVId);
       } else {
         selectedVIds.add(hoverdVId);
       }
-    } else {
+    }
+
+    if (pressSpace) {
       PVector v = cameraController.fromScreen(new PVector(mouseX, mouseY, 0));
       int vId = model.addVertex(v);
       selectedVIds.add(vId);
@@ -66,9 +82,6 @@ void mousePressed() {
 void mouseReleased() {
   if (pressShift) {
     return;
-  }
-  if (!pressCtrl) {
-    selectedVIds.clear();
   }
 }
 
@@ -110,6 +123,10 @@ void keyPressed() {
     pressShift = true;
   }
 
+  if (keyCode == 32) {
+    pressSpace = true;
+  }
+
   if (pressShift) {
     return;
   }
@@ -144,6 +161,10 @@ void keyReleased() {
 
   if (keyCode == SHIFT) {
     pressShift = false;
+  }
+
+  if (keyCode == 32) {
+    pressSpace = false;
   }
 }
 
