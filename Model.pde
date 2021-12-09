@@ -88,9 +88,18 @@ class Model {
     return result;
   }
 
-  void addVertex(PVector v) {
+  int addVertex(PVector v) {
+    int vId = this.vIdCounter;
     this.vertices.put(this.vIdCounter, v);
     this.vIdCounter++;
+    return vId;
+  }
+
+  int addFace(ArrayList<Integer> f) {
+    int fId = this.fIdCounter;
+    this.faces.put(this.fIdCounter, f);
+    this.fIdCounter++;
+    return fId;
   }
 
   void removeVertex(int vId) {

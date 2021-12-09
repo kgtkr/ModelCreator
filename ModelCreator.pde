@@ -55,6 +55,10 @@ void mousePressed() {
       } else {
         selectedVIds.add(hoverdVId);
       }
+    } else {
+      PVector v = cameraController.fromScreen(new PVector(mouseX, mouseY, 0));
+      int vId = model.addVertex(v);
+      selectedVIds.add(vId);
     }
   }
 }
@@ -108,6 +112,13 @@ void keyPressed() {
       model.removeVertex(selectedVId);
     }
     selectedVIds.clear();
+  }
+
+  if (keyCode == ENTER) {
+    if (selectedVIds.size() >= 3) {
+      ArrayList<Integer> vIds = new ArrayList<Integer>(selectedVIds);
+      model.addFace(vIds);
+    }
   }
 }
 
