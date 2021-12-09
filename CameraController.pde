@@ -1,12 +1,9 @@
 // 参考: http://titech-ssr.blog.jp/archives/1047616866.html
 class CameraController {
   final PVector EYE = new PVector(0, 0, 500);
-  PMatrix3D matrix = new PMatrix3D();
+  PMatrix3D matrix;
   CameraController() {
-    this.reset();
-  }
-  void reset() {
-    this.matrix.reset();
+    this.matrix = new PMatrix3D();
     this.matrix.translate(width / 2, height / 2);
   }
   PVector fromScreen(PVector v) {
@@ -29,7 +26,8 @@ class CameraController {
   }
   void mousePressed() {
     if (mouseButton == RIGHT) {
-      this.reset();
+      this.matrix.reset();
+      this.matrix.translate(width / 2, height / 2);
     }
   }
   void mouseDragged() {
