@@ -19,7 +19,9 @@ void setup() {
 void draw() {
   calclateHoverdVId();
   if (redraw) {
+    long start = System.nanoTime();
     background(0);
+    sphereDetail(6);
     cameraController.draw();
     drawAxis();
     drawModel();
@@ -29,11 +31,13 @@ void draw() {
     model.drawSelectedVertices(hoverdVId);
 
     redraw = false;
-    println("redraw", frameCount);
+    long end = System.nanoTime();
+    println("redraw", (end - start) / 1000000.0);
   }
 }
 
 void calclateHoverdVId() {
+  long beginTime = System.nanoTime();
   int newHoverdVId;
   if (!pressSpace) {
     newHoverdVId = findHoverVId();
@@ -44,6 +48,8 @@ void calclateHoverdVId() {
     hoverdVId = newHoverdVId;
     redraw = true;
   }
+  long endTime = System.nanoTime();
+  println("calclateHoverdVId", (endTime - beginTime) / 1000000.0);
 }
 
 int findHoverVId() {
