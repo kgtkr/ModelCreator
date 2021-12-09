@@ -54,7 +54,7 @@ void calclateHoverdVId() {
 }
 
 int findHoverVId() {
-  return model.findVertexId(cameraController.matrix, new PVector(mouseX, mouseY), 1 / cameraController.absoluteScale());
+  return model.findVertexId(cameraController.matrix, getMouse(), 1 / cameraController.absoluteScale());
 }
 
 boolean pressControl() {
@@ -77,7 +77,7 @@ void mousePressed() {
     redraw = true;
   } else {
     if (pressSpace) {
-      PVector v = cameraController.fromScreen(new PVector(mouseX, mouseY, 0));
+      PVector v = cameraController.fromScreen(getMouse());
       int vId = model.addVertex(v);
       model.toggleSelectedVertex(pressControl(), vId);
     } else {
@@ -180,4 +180,8 @@ void drawAxis() {
   stroke(0, 0, 255);
   line(0, 0, 0, 0, 0, 300);
   pop();
+}
+
+PVector getMouse() {
+  return new PVector(mouseX - width / 2, mouseY - height / 2);
 }
