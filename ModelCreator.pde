@@ -21,7 +21,7 @@ void draw() {
   if (redraw) {
     long start = System.nanoTime();
     background(0);
-    sphereDetail(6);
+    sphereDetail(3);
     cameraController.draw();
     drawAxis();
     drawModel();
