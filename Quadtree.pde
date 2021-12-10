@@ -1,5 +1,5 @@
 class Quadtree {
-  final int LEVEL = 8;
+  final int LEVEL = 4;
   final int N = 1 << LEVEL;
   HashSet<Integer>[] values = new HashSet[levelLinearN(LEVEL)];
 
@@ -69,5 +69,11 @@ class Quadtree {
       result.addAll(values[index]);
     }
     return result;
+  }
+
+  void clear() {
+    for (int i = 0; i < values.length; i++) {
+      values[i].clear();
+    }
   }
 }

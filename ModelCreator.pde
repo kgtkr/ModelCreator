@@ -44,7 +44,7 @@ void draw() {
 
 void calclateQuadtree() {
   long beginTime = System.nanoTime();
-  quadtree = new Quadtree();
+  quadtree.clear();
 
   for (int vId : model.vertices.keySet()) {
     PVector v1 = model.vertices.get(vId);
