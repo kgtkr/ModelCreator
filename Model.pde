@@ -6,7 +6,6 @@ class Model {
   int fIdCounter = 1;
   HashMap<Integer, ArrayList<Integer>> faces = new HashMap<>();
   HashSet<Integer> selectedVIds = new HashSet();
-  int hoverdVId = -1;
 
   String[] decode() {
     ArrayList<String> lines = new ArrayList();
@@ -71,26 +70,6 @@ class Model {
       v.y = (v.y - min.y) / scale;
       v.z = (v.z - min.z) / scale;
     }
-  }
-
-  int findVertexId(PMatrix3D matrix, PVector p, float r) {
-    int result = -1;
-    float zMax = Float.MIN_VALUE;
-    for (int vId : this.vertices.keySet()) {
-      PVector v = this.vertices.get(vId);
-      PVector v2 = v.copy();
-      matrix.mult(v2, v2);
-      float z = v2.z;
-      v2.z = 0;
-      float d = PVector.dist(p, v2);
-      if (d < r) {
-        if (z > zMax) {
-          zMax = z;
-          result = vId;
-        }
-      }
-    }
-    return result;
   }
 
   int addVertex(PVector v) {

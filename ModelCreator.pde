@@ -9,6 +9,8 @@ boolean pressSpace;
 Model model;
 int hoverdVId = -1;
 boolean redraw = true;
+Quadtree quadtree = new Quadtree();
+final float HOVER_R = 1;
 
 void setup() {
   size(1280, 720, P3D);
@@ -18,6 +20,9 @@ void setup() {
 
 void draw() {
   translate(width / 2, height / 2);
+  if (redraw) {
+    calclateQuadtree();
+  }
   calclateHoverdVId();
   if (redraw) {
     long start = System.nanoTime();
@@ -37,6 +42,28 @@ void draw() {
   }
 }
 
+void calclateQuadtree() {
+  long beginTime = System.nanoTime();
+  quadtree = new Quadtree();
+
+  for (int vId : model.vertices.keySet()) {
+    PVector v1 = model.vertices.get(vId);
+    PVector v2 = cameraController.toScreen(v1);
+    v2.add(new PVector(width / 2, height / 2));
+    float fx1 = v2.x - HOVER_R;
+    float fy1 = v2.y - HOVER_R;
+    float fx2 = v2.x + HOVER_R;
+    float fy2 = v2.y + HOVER_R;
+    int x1 = Integer.min(Integer.max((int) (fx1 / width * quadtree.N), 0), quadtree.N - 1);
+    int y1 = Integer.min(Integer.max((int) (fy1 / height * quadtree.N), 0), quadtree.N - 1);
+    int x2 = Integer.min(Integer.max((int) (fx2 / width * quadtree.N), 0), quadtree.N - 1);
+    int y2 = Integer.min(Integer.max((int) (fy2 / height * quadtree.N), 0), quadtree.N - 1);
+    quadtree.insert(x1, y1, x2, y2, vId);
+  }
+  long endTime = System.nanoTime();
+  println("calclateQuadtree", (endTime - beginTime) / 1000000.0);
+}
+
 void calclateHoverdVId() {
   long beginTime = System.nanoTime();
   int newHoverdVId;
@@ -54,7 +81,25 @@ void calclateHoverdVId() {
 }
 
 int findHoverVId() {
-  return model.findVertexId(cameraController.matrix, getMouse(), 1 / cameraController.absoluteScale());
+  int result = -1;
+  float zMax = Float.MIN_VALUE;
+  int x = mouseX * quadtree.N / width;
+  int y = mouseY * quadtree.N / height;
+  ArrayList<Integer> vIds = quadtree.query(x, y);
+  for (int vId : vIds) {
+    PVector v = model.vertices.get(vId);
+    PVector v2 = cameraController.toScreen(v);
+    float z = v2.z;
+    v2.z = 0;
+    float d = PVector.dist(getMouse(), v2);
+    if (d < HOVER_R) {
+      if (z > zMax) {
+        zMax = z;
+        result = vId;
+      }
+    }
+  }
+  return result;
 }
 
 boolean pressControl() {
