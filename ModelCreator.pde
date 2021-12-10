@@ -14,7 +14,7 @@ final float HOVER_R = 1;
 
 void setup() {
   size(1280, 720, P3D);
-  model = encodeModel(loadStrings("bunny.obj"));
+  model = encodeModel(loadStrings("model.obj"));
   model.normalize();
 }
 
