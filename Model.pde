@@ -172,7 +172,7 @@ Model encodeModel(String[] lines) {
     } else if (tokens[0].equals("f")) {
       ArrayList<Integer> f = new ArrayList<>();
       for (int i = 1; i < tokens.length; i++) {
-        f.add(Integer.parseInt(tokens[i]));
+        f.add(Integer.parseInt(tokens[i].split("/")[0]));
       }
       m.faces.put(m.fIdCounter, f);
       m.fIdCounter++;
