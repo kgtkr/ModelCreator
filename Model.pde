@@ -5,7 +5,7 @@ class Model {
   HashMap<Integer, PVector> vertices = new HashMap<>();
   int fIdCounter = 1;
   HashMap<Integer, ArrayList<Integer>> faces = new HashMap<>();
-  HashSet<Integer> selectedVIds = new HashSet();
+  ArrayList<Integer> selectedVIds = new ArrayList();
 
   String[] decode() {
     ArrayList<String> lines = new ArrayList();
@@ -80,11 +80,11 @@ class Model {
   }
 
   int addFace() {
-    if (this.selectedVIds.size() < 3) {
+    if (this.selectedVIds.size() >= 3) {
       return -1;
     }
 
-    ArrayList<Integer> vIds = new ArrayList<Integer>(this.selectedVIds);
+    ArrayList<Integer> vIds = new ArrayList<>(this.selectedVIds);
 
     int fId = this.fIdCounter;
     this.faces.put(this.fIdCounter, vIds);
@@ -97,7 +97,7 @@ class Model {
       this.vertices.remove(vId);
       for (int fId : this.faces.keySet()) {
         ArrayList<Integer> f = this.faces.get(fId);
-        f.remove(Integer.valueOf(vId));
+        f.remove(vId);
       }
     }
 
