@@ -80,14 +80,14 @@ class Model {
   }
 
   int addFace() {
-    if (this.selectedVIds.size() >= 3) {
+    if (this.selectedVIds.size() < 3) {
       return -1;
     }
 
     ArrayList<Integer> vIds = new ArrayList<>(this.selectedVIds);
 
     int fId = this.fIdCounter;
-    this.faces.put(this.fIdCounter, vIds);
+    this.faces.put(fId, vIds);
     this.fIdCounter++;
     return fId;
   }
