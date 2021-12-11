@@ -156,14 +156,30 @@ class Model {
     }
     return lines.toArray(new String[0]);
   }
+}
 
-  void normalize() {
-    if (this.vertices.size() == 0) {
-      return;
+void encodeModel(Model m, String[] lines) {
+  ArrayList<PVector> vertices = new ArrayList<>();
+  ArrayList<ArrayList<Integer>> faces = new ArrayList<>();
+
+  for (String line : lines) {
+    String[] tokens = line.split(" ");
+    if (tokens[0].equals("v")) {
+      PVector v = new PVector(Float.parseFloat(tokens[1]), Float.parseFloat(tokens[2]), Float.parseFloat(tokens[3]));
+      vertices.add(v);
+    } else if (tokens[0].equals("f")) {
+      ArrayList<Integer> f = new ArrayList<>();
+      for (int i = 1; i < tokens.length; i++) {
+        f.add(Integer.parseInt(tokens[i].split("/")[0]));
+      }
+      faces.add(f);
     }
+  }
+
+  if (vertices.size() > 0) {
     PVector min = new PVector(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-    PVector max = new PVector(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
-    for (PVector v : this.vertices.values()) {
+    PVector max = new PVector(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+    for (PVector v : vertices) {
       min.x = Math.min(min.x, v.x);
       min.y = Math.min(min.y, v.y);
       min.z = Math.min(min.z, v.z);
@@ -173,25 +189,16 @@ class Model {
     }
     PVector center = PVector.sub(max, min);
     float scale = Math.max(Math.max(center.x, center.y), center.z) / 100;
-    for (int vId : this.vertices.keySet()) {
-      PVector v = this.vertices.get(vId);
-      this.changeVertex(vId, v.copy().sub(min).div(scale));
+    for (PVector v : vertices) {
+      v.sub(min).div(scale);
     }
   }
-}
 
-void encodeModel(Model m, String[] lines) {
-  for (String line : lines) {
-    String[] tokens = line.split(" ");
-    if (tokens[0].equals("v")) {
-      PVector v = new PVector(Float.parseFloat(tokens[1]), Float.parseFloat(tokens[2]), Float.parseFloat(tokens[3]));
-      m.addVertex(v);
-    } else if (tokens[0].equals("f")) {
-      ArrayList<Integer> f = new ArrayList<>();
-      for (int i = 1; i < tokens.length; i++) {
-        f.add(Integer.parseInt(tokens[i].split("/")[0]));
-      }
-      m.addFace(f);
-    }
+  for (PVector v : vertices) {
+    m.addVertex(v);
+  }
+
+  for (ArrayList<Integer> f : faces) {
+    m.addFace(f);
   }
 }

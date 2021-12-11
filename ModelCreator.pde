@@ -82,13 +82,13 @@ void setup() {
         if (Integer.toString(fId).equals(p.getName())) {
           facesShape.removeChild(i);
           facesShape.addChild(createFaceShape(fId, face));
+
           break;
         }
       }
     }
   };
   encodeModel(model, loadStrings("model.obj"));
-  model.normalize();
 }
 
 void draw() {
