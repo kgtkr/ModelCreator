@@ -1,9 +1,10 @@
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 class ModelListener {
   void onAddVertex(int vId, PVector vertex) {
   }
-  void onAddFace(int fId, ArrayList<Integer> face) {
+  void onAddFace(int fId, ArrayList<PVector> face) {
   }
   void onRemoveVertex(int vId, PVector vertex) {
   }
@@ -15,7 +16,7 @@ class ModelListener {
   }
   void onChangeVertex(int vId, PVector prev, PVector v) {
   }
-  void onChangeFace(int fId) {
+  void onChangeFace(int fId, ArrayList<PVector> face) {
   }
 }
 
@@ -44,12 +45,16 @@ class Model {
       this.vertexFaces.get(vId).add(fId);
     }
     this.fIdCounter++;
-    this.listener.onAddFace(fId, f);
+    ArrayList<PVector> face = new ArrayList<>();
+    for (int vId : f) {
+      face.add(this.vertices.get(vId));
+    }
+    this.listener.onAddFace(fId, face);
     return fId;
   }
 
   void removeVertex(int vId) {
-    for (int fId : this.vertexFaces.get(vId)) {
+    for (int fId : this.vertexFaces.get(vId).toArray(new Integer[0])) {
       this.removeFace(fId);
     }
     PVector v = this.vertices.remove(vId);
@@ -79,7 +84,12 @@ class Model {
     PVector prev = this.vertices.put(vId, v);
     this.listener.onChangeVertex(vId, prev, v);
     for (int fId : this.vertexFaces.get(vId)) {
-      this.listener.onChangeFace(fId);
+      ArrayList<Integer> f = this.faces.get(fId);
+      ArrayList<PVector> face = new ArrayList<>();
+      for (int vId2 : f) {
+        face.add(this.vertices.get(vId2));
+      }
+      this.listener.onChangeFace(fId, face);
     }
   }
 
@@ -124,38 +134,6 @@ class Model {
     }
   }
 
-  void drawSelectedVertices(int hoverdVId) {
-    for (int selectedVId : this.selectedVIds) {
-      PVector v = model.vertices.get(selectedVId);
-      push();
-      pushMatrix();
-      translate(v.x, v.y, v.z);
-      if (selectedVId != hoverdVId) {
-        fill(255, 0, 0);
-      } else {
-        fill(255, 255, 0);
-      }
-      noStroke();
-      sphere(5 * cameraController.absoluteScale());
-      popMatrix();
-      pop();
-    }
-  }
-
-  void drawHoverdVertex(int hoverdVId) {
-    if (!selectedVIds.contains(hoverdVId)) {
-      PVector v = model.vertices.get(hoverdVId);
-      push();
-      pushMatrix();
-      translate(v.x, v.y, v.z);
-      fill(150, 150, 150);
-      noStroke();
-      sphere(5 * cameraController.absoluteScale());
-      popMatrix();
-      pop();
-    }
-  }
-
   String[] decode() {
     ArrayList<String> lines = new ArrayList();
     HashMap<Integer, Integer> vIdMap = new HashMap<>();
@@ -179,29 +157,10 @@ class Model {
     return lines.toArray(new String[0]);
   }
 
-  void draw() {
-    for (PVector v : this.vertices.values()) {
-      push();
-      pushMatrix();
-      translate(v.x, v.y, v.z);
-      fill(100, 100, 100);
-      noStroke();
-      sphere(cameraController.absoluteScale());
-      popMatrix();
-      pop();
-    }
-
-    for (ArrayList<Integer> face : this.faces.values()) {
-      beginShape();
-      for (int vId : face) {
-        PVector v = this.vertices.get(vId);
-        vertex(v.x, v.y, v.z);
-      }
-      endShape(CLOSE);
-    }
-  }
-
   void normalize() {
+    if (this.vertices.size() == 0) {
+      return;
+    }
     PVector min = new PVector(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
     PVector max = new PVector(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
     for (PVector v : this.vertices.values()) {

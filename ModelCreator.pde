@@ -13,41 +13,58 @@ boolean redrawCamera = true;
 boolean redrawHover = true;
 Quadtree quadtree = new Quadtree();
 final float HOVER_R = 5;
+PShape facesShape;
 
 void setup() {
   size(1280, 720, P3D);
+  facesShape = createShape(GROUP);
   model = new Model();
   model.listener = new ModelListener() {
-    @Override
-      void onAddVertex(int vId, PVector v) {
+    PShape createFaceShape(int fId, ArrayList<PVector> vs) {
+      PShape p = createShape();
+      p.set3D(true);
+      p.beginShape();
+      p.fill(255, 255, 255);
+      p.noStroke();
+      for (PVector v : vs) {
+        p.vertex(v.x, v.y, v.z);
+      }
+      p.endShape(CLOSE);
+      p.setName(Integer.toString(fId));
+      return p;
+    }
+
+    @Override void onAddVertex(int vId, PVector v) {
       int[] quadtreeValue = quadtreeValue(v);
       quadtree.insert(quadtreeValue[0], quadtreeValue[1], quadtreeValue[2], quadtreeValue[3], vId);
       redrawModel = true;
     }
-    @Override
-      void onAddFace(int fId, ArrayList<Integer> face) {
+    @Override void onAddFace(int fId, ArrayList<PVector> face) {
+      facesShape.addChild(createFaceShape(fId, face));
       redrawModel = true;
     }
-    @Override
-      void onRemoveVertex(int vId, PVector v) {
+    @Override void onRemoveVertex(int vId, PVector v) {
       int[] quadtreeValue = quadtreeValue(v);
       quadtree.remove(quadtreeValue[0], quadtreeValue[1], quadtreeValue[2], quadtreeValue[3], vId);
       redrawModel = true;
     }
-    @Override
-      void onRemoveFace(int fId) {
+    @Override void onRemoveFace(int fId) {
+      for (int i = 0; i < facesShape.getChildCount(); i++) {
+        PShape p = facesShape.getChild(i);
+        if (Integer.toString(fId).equals(p.getName())) {
+          facesShape.removeChild(i);
+          break;
+        }
+      }
       redrawModel = true;
     }
-    @Override
-      void onSelectVertex(int vId) {
+    @Override void onSelectVertex(int vId) {
       redrawModel = true;
     }
-    @Override
-      void onDeselectVertex(int vId) {
+    @Override void onDeselectVertex(int vId) {
       redrawModel = true;
     }
-    @Override
-      void onChangeVertex(int vId, PVector prev, PVector vertex) {
+    @Override void onChangeVertex(int vId, PVector prev, PVector vertex) {
       {
         int[] quadtreeValue = quadtreeValue(prev);
         quadtree.remove(quadtreeValue[0], quadtreeValue[1], quadtreeValue[2], quadtreeValue[3], vId);
@@ -58,9 +75,16 @@ void setup() {
       }
       redrawModel = true;
     }
-    @Override
-      void onChangeFace(int fId) {
+    @Override void onChangeFace(int fId, ArrayList<PVector> face) {
       redrawModel = true;
+      for (int i = 0; i < facesShape.getChildCount(); i++) {
+        PShape p = facesShape.getChild(i);
+        if (Integer.toString(fId).equals(p.getName())) {
+          facesShape.removeChild(i);
+          facesShape.addChild(createFaceShape(fId, face));
+          break;
+        }
+      }
     }
   };
   encodeModel(model, loadStrings("model.obj"));
@@ -81,9 +105,34 @@ void draw() {
     drawAxis();
     drawModel();
     if (hoverdVId != -1) {
-      model.drawHoverdVertex(hoverdVId);
+      if (!model.selectedVIds.contains(hoverdVId)) {
+        PVector v = model.vertices.get(hoverdVId);
+        push();
+        pushMatrix();
+        translate(v.x, v.y, v.z);
+        fill(150, 150, 150);
+        noStroke();
+        sphere(5 * cameraController.absoluteScale());
+        popMatrix();
+        pop();
+      }
     }
-    model.drawSelectedVertices(hoverdVId);
+
+    for (int selectedVId : model.selectedVIds) {
+      PVector v = model.vertices.get(selectedVId);
+      push();
+      pushMatrix();
+      translate(v.x, v.y, v.z);
+      if (selectedVId != hoverdVId) {
+        fill(255, 0, 0);
+      } else {
+        fill(255, 255, 0);
+      }
+      noStroke();
+      sphere(5 * cameraController.absoluteScale());
+      popMatrix();
+      pop();
+    }
 
     redrawCamera = false;
     redrawModel = false;
@@ -165,7 +214,7 @@ void drawModel() {
   fill(255, 255, 255);
   strokeWeight(cameraController.absoluteScale());
   stroke(200, 200, 200);
-  model.draw();
+  shape(facesShape);
   pop();
 }
 
