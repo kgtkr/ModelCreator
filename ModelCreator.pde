@@ -8,23 +8,72 @@ boolean pressShift;
 boolean pressSpace;
 Model model;
 int hoverdVId = -1;
-boolean redraw = true;
+boolean redrawModel = true;
+boolean redrawCamera = true;
+boolean redrawHover = true;
 Quadtree quadtree = new Quadtree();
 final float HOVER_R = 5;
 
 void setup() {
   size(1280, 720, P3D);
-  model = encodeModel(loadStrings("model.obj"), new Model());
+  model = new Model();
+  model.listener = new ModelListener() {
+    @Override
+      void onAddVertex(int vId, PVector v) {
+      int[] quadtreeValue = quadtreeValue(v);
+      quadtree.insert(quadtreeValue[0], quadtreeValue[1], quadtreeValue[2], quadtreeValue[3], vId);
+      redrawModel = true;
+    }
+    @Override
+      void onAddFace(int fId, ArrayList<Integer> face) {
+      redrawModel = true;
+    }
+    @Override
+      void onRemoveVertex(int vId, PVector v) {
+      int[] quadtreeValue = quadtreeValue(v);
+      quadtree.remove(quadtreeValue[0], quadtreeValue[1], quadtreeValue[2], quadtreeValue[3], vId);
+      redrawModel = true;
+    }
+    @Override
+      void onRemoveFace(int fId) {
+      redrawModel = true;
+    }
+    @Override
+      void onSelectVertex(int vId) {
+      redrawModel = true;
+    }
+    @Override
+      void onDeselectVertex(int vId) {
+      redrawModel = true;
+    }
+    @Override
+      void onChangeVertex(int vId, PVector prev, PVector vertex) {
+      {
+        int[] quadtreeValue = quadtreeValue(prev);
+        quadtree.remove(quadtreeValue[0], quadtreeValue[1], quadtreeValue[2], quadtreeValue[3], vId);
+      }
+      {
+        int[]  quadtreeValue = quadtreeValue(vertex);
+        quadtree.insert(quadtreeValue[0], quadtreeValue[1], quadtreeValue[2], quadtreeValue[3], vId);
+      }
+      redrawModel = true;
+    }
+    @Override
+      void onChangeFace(int fId) {
+      redrawModel = true;
+    }
+  };
+  encodeModel(model, loadStrings("model.obj"));
   model.normalize();
 }
 
 void draw() {
   translate(width / 2, height / 2);
-  if (redraw) {
+  if (redrawCamera) {
     calclateQuadtree();
   }
   calclateHoverdVId();
-  if (redraw) {
+  if (redrawCamera || redrawModel || redrawHover) {
     long start = System.nanoTime();
     background(0);
     sphereDetail(3);
@@ -36,10 +85,26 @@ void draw() {
     }
     model.drawSelectedVertices(hoverdVId);
 
-    redraw = false;
+    redrawCamera = false;
+    redrawModel = false;
+    redrawHover = false;
     long end = System.nanoTime();
     println("redraw", (end - start) / 1000000.0);
   }
+}
+
+int[] quadtreeValue(PVector v1) {
+  PVector v2 = cameraController.toScreen(v1);
+  v2.add(new PVector(width / 2, height / 2));
+  float fx1 = v2.x - HOVER_R;
+  float fy1 = v2.y - HOVER_R;
+  float fx2 = v2.x + HOVER_R;
+  float fy2 = v2.y + HOVER_R;
+  int x1 = Integer.min(Integer.max((int) (fx1 / width * quadtree.N), 0), quadtree.N - 1);
+  int y1 = Integer.min(Integer.max((int) (fy1 / height * quadtree.N), 0), quadtree.N - 1);
+  int x2 = Integer.min(Integer.max((int) (fx2 / width * quadtree.N), 0), quadtree.N - 1);
+  int y2 = Integer.min(Integer.max((int) (fy2 / height * quadtree.N), 0), quadtree.N - 1);
+  return new int[] { x1, y1, x2, y2 };
 }
 
 void calclateQuadtree() {
@@ -47,25 +112,15 @@ void calclateQuadtree() {
   quadtree.clear();
 
   for (int vId : model.vertices.keySet()) {
-    PVector v1 = model.vertices.get(vId);
-    PVector v2 = cameraController.toScreen(v1);
-    v2.add(new PVector(width / 2, height / 2));
-    float fx1 = v2.x - HOVER_R;
-    float fy1 = v2.y - HOVER_R;
-    float fx2 = v2.x + HOVER_R;
-    float fy2 = v2.y + HOVER_R;
-    int x1 = Integer.min(Integer.max((int) (fx1 / width * quadtree.N), 0), quadtree.N - 1);
-    int y1 = Integer.min(Integer.max((int) (fy1 / height * quadtree.N), 0), quadtree.N - 1);
-    int x2 = Integer.min(Integer.max((int) (fx2 / width * quadtree.N), 0), quadtree.N - 1);
-    int y2 = Integer.min(Integer.max((int) (fy2 / height * quadtree.N), 0), quadtree.N - 1);
-    quadtree.insert(x1, y1, x2, y2, vId);
+    PVector v = model.vertices.get(vId);
+    int[] quadtreeValue = quadtreeValue(v);
+    quadtree.insert(quadtreeValue[0], quadtreeValue[1], quadtreeValue[2], quadtreeValue[3], vId);
   }
   long endTime = System.nanoTime();
   println("calclateQuadtree", (endTime - beginTime) / 1000000.0);
 }
 
 void calclateHoverdVId() {
-  long beginTime = System.nanoTime();
   int newHoverdVId;
   if (!pressSpace) {
     newHoverdVId = findHoverVId();
@@ -74,15 +129,13 @@ void calclateHoverdVId() {
   }
   if (newHoverdVId != hoverdVId) {
     hoverdVId = newHoverdVId;
-    redraw = true;
+    redrawHover = true;
   }
-  long endTime = System.nanoTime();
-  println("calclateHoverdVId", (endTime - beginTime) / 1000000.0);
 }
 
 int findHoverVId() {
   int result = -1;
-  float zMax = Float.MIN_VALUE;
+  float zMax = -Float.MAX_VALUE;
   int x = mouseX * quadtree.N / width;
   int y = mouseY * quadtree.N / height;
   ArrayList<Integer> vIds = quadtree.query(x, y);
@@ -119,7 +172,7 @@ void drawModel() {
 void mousePressed() {
   if (pressShift) {
     cameraController.mousePressed();
-    redraw = true;
+    redrawCamera = true;
   } else {
     if (pressSpace) {
       PVector v = cameraController.fromScreen(getMouse());
@@ -132,27 +185,27 @@ void mousePressed() {
         model.clearSelectedVertices();
       }
     }
-    redraw = true;
+    redrawModel = true;
   }
 }
 
 void mouseDragged() {
   if (pressShift) {
     cameraController.mouseDragged();
-    redraw = true;
+    redrawCamera = true;
   } else {
     PVector v1 = cameraController.fromScreen(new PVector(mouseX, mouseY, 0));
     PVector v2 = cameraController.fromScreen(new PVector(pmouseX, pmouseY, 0));
     PVector v3 = PVector.sub(v1, v2);
     model.moveVertices(v3);
-    redraw = true;
+    redrawModel = true;
   }
 }
 
 void mouseWheel(MouseEvent event) {
   if (pressShift) {
     cameraController.mouseWheel(event);
-    redraw = true;
+    redrawCamera = true;
   }
 }
 
@@ -183,12 +236,12 @@ void keyPressed() {
 
   if (keyCode == BACKSPACE) {
     model.removeSelectedVertices();
-    redraw = true;
+    redrawModel = true;
   }
 
   if (keyCode == ENTER) {
     model.addFaceWithSelectedVertices();
-    redraw = true;
+    redrawModel = true;
   }
 }
 

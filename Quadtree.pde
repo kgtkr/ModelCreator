@@ -1,5 +1,5 @@
 class Quadtree {
-  final int LEVEL = 4;
+  final int LEVEL = 6;
   final int N = 1 << LEVEL;
   HashSet<Integer>[] values = new HashSet[levelLinearN(LEVEL)];
 
