@@ -100,7 +100,7 @@ void draw() {
   if (redrawCamera || redrawModel || redrawHover) {
     long start = System.nanoTime();
     background(0);
-    sphereDetail(3);
+    sphereDetail(8);
     cameraController.draw();
     drawAxis();
     drawModel();
