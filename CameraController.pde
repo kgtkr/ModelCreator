@@ -19,7 +19,7 @@ class CameraController {
     return result;
   }
   void draw() {
-    ortho();
+    ortho(-width/2, width/2, -height/2, height/2, -10000, 10000);
     camera(this.EYE.x, this.EYE.y, this.EYE.z, 0, 0, 0, 0, 1, 0);
     applyMatrix(this.matrix);
   }

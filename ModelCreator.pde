@@ -10,11 +10,11 @@ Model model;
 int hoverdVId = -1;
 boolean redraw = true;
 Quadtree quadtree = new Quadtree();
-final float HOVER_R = 1;
+final float HOVER_R = 5;
 
 void setup() {
   size(1280, 720, P3D);
-  model = encodeModel(loadStrings("model.obj"));
+  model = encodeModel(loadStrings("model.obj"), new Model());
   model.normalize();
 }
 
@@ -182,12 +182,12 @@ void keyPressed() {
   }
 
   if (keyCode == BACKSPACE) {
-    model.removeVertices();
+    model.removeSelectedVertices();
     redraw = true;
   }
 
   if (keyCode == ENTER) {
-    model.addFace();
+    model.addFaceWithSelectedVertices();
     redraw = true;
   }
 }
