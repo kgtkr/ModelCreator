@@ -14,6 +14,7 @@ boolean redrawHover = true;
 Quadtree quadtree = new Quadtree();
 final float HOVER_R = 5;
 PShape facesShape;
+PVector moveVector = null;
 
 void setup() {
   size(1280, 720, P3D);
@@ -97,6 +98,12 @@ void setup() {
 }
 
 void draw() {
+  if (moveVector != null) {
+    model.moveVertices(moveVector);
+    redrawModel = true;
+    moveVector = null;
+  }
+
   translate(width / 2, height / 2);
   if (redrawCamera) {
     calclateQuadtree();
@@ -248,11 +255,14 @@ void mouseDragged() {
     cameraController.mouseDragged();
     redrawCamera = true;
   } else {
+    if (moveVector == null) {
+      moveVector = new PVector();
+    }
+
     PVector v1 = cameraController.fromScreen(new PVector(mouseX, mouseY, 0));
     PVector v2 = cameraController.fromScreen(new PVector(pmouseX, pmouseY, 0));
     PVector v3 = PVector.sub(v1, v2);
-    model.moveVertices(v3);
-    redrawModel = true;
+    moveVector.add(v3);
   }
 }
 
