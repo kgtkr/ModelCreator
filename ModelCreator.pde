@@ -88,7 +88,12 @@ void setup() {
       }
     }
   };
-  encodeModel(model, loadStrings("model.obj"));
+  {
+    String[] lines = loadStrings("model.obj");
+    if (lines != null) {
+      encodeModel(model, loadStrings("model.obj"));
+    }
+  }
 }
 
 void draw() {
@@ -291,6 +296,11 @@ void keyPressed() {
   if (keyCode == ENTER) {
     model.addFaceWithSelectedVertices();
     redrawModel = true;
+  }
+
+  if (key == 's') {
+    String[] lines = model.decode();
+    saveStrings("model.obj", lines);
   }
 }
 

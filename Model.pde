@@ -188,7 +188,7 @@ void encodeModel(Model m, String[] lines) {
       max.z = Math.max(max.z, v.z);
     }
     PVector center = PVector.sub(max, min);
-    float scale = Math.max(Math.max(center.x, center.y), center.z) / 100;
+    float scale = Math.max(Math.max(center.x, center.y), center.z) / 200;
     for (PVector v : vertices) {
       v.sub(min).div(scale);
     }
